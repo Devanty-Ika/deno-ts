@@ -1,0 +1,91 @@
+
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+
+<% if (subdata.msgError!=' ') {%>
+    <div class="bg-danger text-white">
+        <%= subdata.msgError %>
+    </div>
+<% } %>
+
+<form action="posting" method="POST">
+    <h4>Daftar Artikel</h4>
+    <input type="hidden" name="status_data" id="idOperasiData" value="<%= subdata.operasi_database%>">
+    <input type="hidden" name="permalink_lama" id="idPermalinkLama">
+
+    <div class="form-group">
+        <small class="form-text form-muted">Judul</small>
+        <input type="text" name="judul" id="idJudul" class="form-control"></div>
+    <div class="form-group">
+        <small class="form-text form-muted">Permalink</small>
+        <input type="text" name="permalink" id="idPermalink" class="form-control"></div>
+    <div class="form-group">
+        <small class="form-text form-muted">Kategori</small>
+        <select name="kategori" id="idSelect" class="form-control"></select>
+    </div>
+    <div class="form-group">
+        <small class="form-text form-muted">Deskripsi</small>
+        <textarea name="deskripsi" id="idDeskripsi" cols="30" rows="2" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <small class="form-text form-muted">Konten</small>
+        <textarea name="konten" id="idKonten"></textarea>
+    </div>
+    <input type="submit" value="Simpan" class="btn btn-primary">
+</form>
+<script>
+  $(document).ready(function() {
+        $("#idJudul").blur(function(){
+            var judul = $("#idJudul").val();
+            var permalink = judul.toLowerCase().replace(/ /g,'-').replace(/[^a-zA-Z0-9-_]/g,'');
+            $("#idPermalink").val(permalink);
+        });
+
+      var ktg =' <%= JSON.stringify(subdata.skill) %>'.replace(/&quot;/g, '"');
+      var selectEl = $ ('#idSelect');
+      $.each( JSON.parse(ktg), function(index,data){
+        $("<option/>", {
+            value:data.kode,
+            text:data.nama 
+        }).appendTo(selectEl);
+      })
+
+      var dtlokal = localStorage.getItem("data_local");
+      if (dtlokal != null){
+          var data = JSON.parse(dtlokal);
+          $('#idJudul').val(data[0].judul);
+          $('#idPermalink').val(data[0].permalink);
+          $('#idPermalinkLama').val(data[0].permalink)
+          $('#idSelect').val(data[0].kategori);
+          $('#idDeskripsi').val(data[0].deskripsi);
+          $('#idKonten').val(data[0].konten);
+          localStorage.removeItem("data_local");
+      } else { 
+        $('#idOperasiData').val("INSERT");
+        $('#idJudul').val(' ');
+        $('#idPermalink').val(' ');
+        $('#idPermalinkLama').val(' ')
+        $('#idSelect').val(' ');
+        $('#idDeskripsi').val(' ');
+        $('#idKonten').val(' ');
+      };
+
+      $('#idKonten').summernote({
+        placeholder: 'Tuliskan Konten Artikel Disini',
+        tabsize: 2,
+        height: 100
+      });
+
+      $('form').submit(function (){
+          var data = [];
+          data.push({
+              "judul" : $('#idJudul').val(),
+              "permalink" : $('#idPermalink').val(),
+              "kategori" : $('#idSelect').val(),
+              "deskripsi" : $('#idDeskripsi').val(),
+              "konten" : $('#idKonten').val()
+          });
+          localStorage.setItem("data_local",JSON.stringify(data));
+      });
+  });//end document ready
+</script>
